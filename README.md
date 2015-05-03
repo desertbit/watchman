@@ -40,6 +40,9 @@ It is also possible to set config values through the environment variables:
 - `WATCHMAN_DESC`
 - `WATCHMAN_PASSWD`
 
+If the 'ENV:' is added to the prefix, then the value is obtained from another environment variable.
+Example: `WATCHMAN_DEST_HOST="ENV:SERVICE_PORT_8080_TCP_ADDR"`
+
 
 ## Manage Users
 

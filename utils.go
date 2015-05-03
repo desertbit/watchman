@@ -25,10 +25,22 @@ import (
 	"strings"
 )
 
+const (
+	getFromEnvPrefix = "ENV:"
+)
+
 // getEnv gets the environment variable or if empty fallsback to the default value.
 func getEnv(v, d string) string {
 	envV := os.Getenv(v)
 	if len(envV) > 0 {
+		// Check if the value tells us to get the value from another environment variable.
+		if strings.HasPrefix(envV, getFromEnvPrefix) {
+			envV = os.Getenv(strings.TrimPrefix(envV, getFromEnvPrefix))
+			if len(envV) == 0 {
+				return d
+			}
+		}
+
 		return envV
 	}
 
