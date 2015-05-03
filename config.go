@@ -20,6 +20,8 @@ package main
 
 import (
 	"fmt"
+	"path/filepath"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 )
@@ -67,12 +69,18 @@ func (c *config) Init() error {
 	c.listenAddress = fmt.Sprintf("%s:%v", c.ListenHost, c.ListenPort)
 	c.destinationAddress = fmt.Sprintf("%s:%v", c.DestinationHost, c.DestinationPort)
 
+	// Prepare the passwd path.
+	c.PasswdFile = filepath.Clean(c.PasswdFile)
+	if !strings.HasPrefix(c.PasswdFile, "/") {
+		c.PasswdFile = filepath.Clean(lookupDir + "/" + c.PasswdFile)
+	}
+
 	// Check if the passwd file exists.
 	e, err := exists(c.PasswdFile)
 	if err != nil {
 		return err
 	} else if !e {
-		return fmt.Errorf("watchman passwd file is missing!")
+		return fmt.Errorf("watchman passwd file '%s' is missing!", c.PasswdFile)
 	}
 
 	return nil

@@ -22,6 +22,8 @@ import (
 	"flag"
 	"net/http"
 	"net/http/httputil"
+	"os"
+	"path/filepath"
 
 	log "github.com/Sirupsen/logrus"
 	auth "github.com/abbot/go-http-auth"
@@ -29,26 +31,48 @@ import (
 
 const (
 	configName = "watchman.conf"
+	envDir     = "WATCHMAN_DIR"
+	envConfig  = "WATCHMAN_CONFIG"
+)
+
+var (
+	lookupDir = "." // Current working directory.
 )
 
 func main() {
-	// Get the config path from the command line arguments.
+	// Get the lookup directory path from the environment variable if defined.
+	envV := os.Getenv(envDir)
+	if len(envV) > 0 {
+		lookupDir = envV
+	}
+
 	// The default config path is just the config name.
 	// This will load the config from the current working directory.
-	var configPath string
-	flag.StringVar(&configPath, "config", configName, "set config file path.")
+	configPath := configName
+
+	// Get the config path from the environment variable if defined.
+	envV = os.Getenv(envConfig)
+	if len(envV) > 0 {
+		configPath = envV
+	}
+
+	// Get the config path from the command line arguments.
+	flag.StringVar(&configPath, "config", configPath, "set config file path.")
 
 	// Parse the flags.
 	flag.Parse()
 
 	// Load the config.
-	err := LoadConfig(configPath)
+	err := LoadConfig(filepath.Clean(lookupDir + "/" + configPath))
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// Create the secret provider.
+	secretProvider := auth.HtpasswdFileProvider(Config.PasswdFile)
+
 	// Create the authenticator.
-	authenticator := auth.NewBasicAuthenticator(Config.Description, auth.HtpasswdFileProvider(Config.PasswdFile))
+	authenticator := auth.NewBasicAuthenticator(Config.Description, secretProvider)
 
 	// Set the HTTP routes.
 	http.HandleFunc("/", authenticator.Wrap(handleReverseProxyFunc))
