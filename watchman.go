@@ -22,7 +22,6 @@ import (
 	"flag"
 	"net/http"
 	"net/http/httputil"
-	"os"
 	"path/filepath"
 
 	log "github.com/Sirupsen/logrus"
@@ -31,8 +30,9 @@ import (
 
 const (
 	configName = "watchman.conf"
-	envDir     = "WATCHMAN_DIR"
-	envConfig  = "WATCHMAN_CONFIG"
+
+	envDir    = "WATCHMAN_DIR"
+	envConfig = "WATCHMAN_CONFIG"
 )
 
 var (
@@ -41,20 +41,12 @@ var (
 
 func main() {
 	// Get the lookup directory path from the environment variable if defined.
-	envV := os.Getenv(envDir)
-	if len(envV) > 0 {
-		lookupDir = envV
-	}
-
-	// The default config path is just the config name.
-	// This will load the config from the current working directory.
-	configPath := configName
+	lookupDir = getEnv(envDir, lookupDir)
 
 	// Get the config path from the environment variable if defined.
-	envV = os.Getenv(envConfig)
-	if len(envV) > 0 {
-		configPath = envV
-	}
+	// The default config path is just the config name.
+	// This will load the config from the current working directory.
+	configPath := getEnv(envConfig, configName)
 
 	// Get the config path from the command line arguments.
 	flag.StringVar(&configPath, "config", configPath, "set config file path.")

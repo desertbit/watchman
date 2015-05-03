@@ -31,6 +31,15 @@ Check the sample configuration in the sample directory.
 - `WATCHMAN_CONFIG` Sets the path to the watchman configuration.
 - `WATCHMAN_DIR` Sets the lookup directory path. (Config and passwd files)
 
+It is also possible to set config values through the environment variables:
+
+- `WATCHMAN_LISTEN_HOST`
+- `WATCHMAN_LISTEN_PORT`
+- `WATCHMAN_DEST_HOST`
+- `WATCHMAN_DEST_PORT`
+- `WATCHMAN_DESC`
+- `WATCHMAN_PASSWD`
+
 
 ## Manage Users
 

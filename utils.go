@@ -21,8 +21,29 @@ package main
 import (
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 )
+
+// getEnv gets the environment variable or if empty fallsback to the default value.
+func getEnv(v, d string) string {
+	envV := os.Getenv(v)
+	if len(envV) > 0 {
+		return envV
+	}
+
+	return d
+}
+
+// getEnvInt same as getEnv, but uses integers.
+func getEnvInt(v string, d int) int {
+	v = getEnv(v, strconv.Itoa(d))
+	vi, err := strconv.Atoi(v)
+	if err != nil {
+		return d
+	}
+	return vi
+}
 
 // exists returns whether the given file or directory exists or not
 func exists(path string) (bool, error) {

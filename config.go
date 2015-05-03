@@ -24,10 +24,18 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
+	log "github.com/Sirupsen/logrus"
 )
 
 const (
 	maxPort = 65535
+
+	envListenHost      = "WATCHMAN_LISTEN_HOST"
+	envListenPort      = "WATCHMAN_LISTEN_PORT"
+	envDestinationHost = "WATCHMAN_DEST_HOST"
+	envDestinationPort = "WATCHMAN_DEST_PORT"
+	envDescription     = "WATCHMAN_DESC"
+	envPasswdFile      = "WATCHMAN_PASSWD"
 )
 
 var (
@@ -88,10 +96,26 @@ func (c *config) Init() error {
 
 // LoadConfig loads the config.
 func LoadConfig(configPath string) error {
-	// Load and decode the file.
-	_, err := toml.DecodeFile(configPath, &Config)
+	// First obtain all the values from the environment variables if present.
+	Config.ListenHost = getEnv(envListenHost, Config.ListenHost)
+	Config.ListenPort = getEnvInt(envListenPort, Config.ListenPort)
+	Config.DestinationHost = getEnv(envDestinationHost, Config.DestinationHost)
+	Config.DestinationPort = getEnvInt(envDestinationPort, Config.DestinationPort)
+	Config.Description = getEnv(envDescription, Config.Description)
+	Config.PasswdFile = getEnv(envPasswdFile, Config.PasswdFile)
+
+	// Load the config if it exists.
+	e, err := exists(configPath)
 	if err != nil {
-		return fmt.Errorf("failed to load config file '%s': %v", configPath, err)
+		return err
+	} else if !e {
+		log.Warningf("no watchman config found: '%s'", configPath)
+	} else {
+		// Load and decode the file.
+		_, err = toml.DecodeFile(configPath, &Config)
+		if err != nil {
+			return fmt.Errorf("failed to load config file '%s': %v", configPath, err)
+		}
 	}
 
 	// Initialize the config.
