@@ -11,7 +11,6 @@ Run watchman and set the configuration path.
 ```
 
 Then go to http://localhost/ and log in as `foo`, password: `bar`.
-
 It is also possible to pass the configuration path with an environment variable. Check the section below.
 
 
@@ -57,7 +56,7 @@ docker pull desertbit/watchman
 ```
 
 There is one volume `/config`. Place the watchman configuration and htpasswd file to that location.
-The run the image.
+Then run the image.
 
 ```
 docker run -p 80:80 -v /path/to/configdir:/config desertbit/watchman
